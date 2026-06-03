@@ -1,0 +1,18 @@
+{
+  "name": "診断士 Study Tracker",
+  "short_name": "診断士Tracker",
+  "description": "中小企業診断士試験の学習時間、問題数、正答率を管理するアプリ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#147a86",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

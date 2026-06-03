@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#147a86" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="診断士Tracker" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>診断士 Study Tracker</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=4" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="top-band">
+        <div class="title-block">
+          <p class="eyebrow">中小企業診断士試験</p>
+          <h1>53日で200時間を積み直す</h1>
+          <p class="lead">時間だけでなく、スピ問・過去問の回転、科目の偏り、目標差をまとめて見る勉強管理。</p>
+        </div>
+        <div class="today-panel" aria-live="polite">
+          <span class="panel-label">今日の目安</span>
+          <strong id="todayTarget">3.0h</strong>
+          <span id="todayKind">平日ペース</span>
+        </div>
+      </section>
+
+      <section class="metrics-grid" aria-label="進捗サマリー">
+        <article class="metric">
+          <span>今日の合計</span>
+          <strong id="todayTotal">0.0h</strong>
+          <small id="todayStatus">未記録</small>
+        </article>
+        <article class="metric">
+          <span>現在累計</span>
+          <strong id="totalHours">100.0h</strong>
+          <small id="loggedSessions">0件の記録</small>
+        </article>
+        <article class="metric">
+          <span>300h目標との差</span>
+          <strong id="gapHours">-200.0h</strong>
+          <small id="gapCaption">追い上げ対象</small>
+        </article>
+        <article class="metric">
+          <span>残り必要</span>
+          <strong id="remainingHours">200.0h</strong>
+          <small>300h到達まで</small>
+        </article>
+        <article class="metric">
+          <span>残り日必須平均</span>
+          <strong id="dailyAverage">3.8h</strong>
+          <small>53日で割った目安</small>
+        </article>
+      </section>
+
+      <section class="workbench">
+        <form id="studyForm" class="entry-form">
+          <div class="section-heading">
+            <h2>学習ログ</h2>
+            <button class="ghost-button" id="seedButton" type="button">サンプル投入</button>
+          </div>
+          <div class="form-grid">
+            <label>
+              日付
+              <input id="dateInput" type="date" required />
+            </label>
+            <label>
+              時間
+              <input id="hoursInput" type="number" min="0.25" max="12" step="0.25" value="1.5" required />
+            </label>
+            <label>
+              科目
+              <select id="subjectInput" required></select>
+            </label>
+            <label>
+              教材
+              <select id="materialInput" required>
+                <option>スピ問</option>
+                <option>過去問</option>
+                <option>テキスト</option>
+                <option>模試・答練</option>
+                <option>復習ノート</option>
+              </select>
+            </label>
+            <label>
+              解いた問題数
+              <input id="questionsInput" type="number" min="0" max="500" step="1" value="0" />
+            </label>
+            <label>
+              正解した問題数
+              <input id="correctInput" type="number" min="0" max="500" step="1" value="0" />
+            </label>
+            <label>
+              内容
+              <input id="contentInput" type="text" placeholder="例: 企業経営理論 H30 第1-12問" required />
+            </label>
+            <label>
+              手応え
+              <select id="confidenceInput">
+                <option value="good">できた</option>
+                <option value="ok">普通</option>
+                <option value="weak">要復習</option>
+              </select>
+            </label>
+          </div>
+          <label class="wide-label">
+            メモ
+            <textarea id="memoInput" rows="3" placeholder="間違えた論点、次回つぶすところ"></textarea>
+          </label>
+          <button class="primary-button" type="submit">記録する</button>
+        </form>
+
+        <aside class="focus-panel">
+          <div class="section-heading">
+            <h2>今日の作戦</h2>
+            <span id="phaseBadge">立て直し期</span>
+          </div>
+          <div class="progress-bar" aria-label="累計進捗">
+            <span id="progressFill"></span>
+          </div>
+          <p id="progressText">300時間に対して 33.3% 進捗。</p>
+          <div class="allocation-grid" aria-label="残り必要時間の按配">
+            <div>
+              <span>平日必須平均</span>
+              <strong id="weekdayAllocation">3.0h</strong>
+              <small id="weekdayCount">39日</small>
+            </div>
+            <div>
+              <span>休日必須平均</span>
+              <strong id="weekendAllocation">7.0h</strong>
+              <small id="weekendCount">14日</small>
+            </div>
+          </div>
+          <ul class="strategy-list" id="strategyList"></ul>
+        </aside>
+      </section>
+
+      <section class="analysis-grid">
+        <div class="panel">
+          <div class="section-heading">
+            <h2>科目別</h2>
+            <span>偏りチェック</span>
+          </div>
+          <div id="subjectBars" class="bars"></div>
+        </div>
+
+        <div class="panel">
+          <div class="section-heading">
+            <h2>教材別</h2>
+            <span>回転チェック</span>
+          </div>
+          <div id="materialBars" class="bars"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <h2>科目別 問題数</h2>
+          <span>積み上げと正答率</span>
+        </div>
+        <div id="subjectQuestionStats" class="question-stats"></div>
+      </section>
+
+      <section class="panel log-panel">
+        <div class="section-heading">
+          <h2>直近ログ</h2>
+          <button class="ghost-button" id="clearButton" type="button">全削除</button>
+        </div>
+        <div id="logList" class="log-list"></div>
+      </section>
+
+      <section class="panel daily-panel">
+        <div class="section-heading">
+          <h2>カレンダー</h2>
+          <span>日別合算</span>
+        </div>
+        <div id="dailyList" class="calendar-grid"></div>
+        <div id="dayDetail" class="day-detail" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script src="app.js?v=4"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("sw.js");
+      }
+    </script>
+  </body>
+</html>
